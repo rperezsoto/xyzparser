@@ -2,7 +2,35 @@ from pathlib import Path
 
 import numpy as np
 
-class xyz_mol(object): 
+class XYZMolecule(object): 
+    """
+    Molecule object containing only the information included in an xyz file. 
+    
+    Attributes
+    ----------
+
+    filepath : str, Path or None
+        path to the file containing the xyz formatted file
+    
+    xyz : np.array
+        matrix with the xyz coordinates in the same units as the original xyz file.
+        (typically angstroms)
+    
+    title : str
+        title of the molecule
+    
+    atoms : tuple
+        tuple of atom symbols or atomic numbers in the same order as the xyz coordinates. 
+    
+    n : int 
+        number or atoms in the molecule. First line of the xyz format. 
+    
+    Parameters
+    ----------
+    filepath : str or Path, optional
+        path to the file containing the xyz formatted file, by default None
+    
+    """
     def __init__(self,filepath=None):
         if filepath is not None: 
             filepath = Path(filepath)
@@ -16,6 +44,21 @@ class xyz_mol(object):
         return self.n
 
     def read(self,txt=None):
+        """
+        reads and parses an xyz formatted string, if none is provided it reads 
+        the file in the attribute filepath and parses its contents.
+
+        Parameters
+        ----------
+        txt : str, optional
+            xyz formatted string, by default None. If None provided it will 
+            parse the contents of the file at the filepath attribute. 
+
+        Raises
+        ------
+        ValueError
+            No filepath nor txt string have been provided. 
+        """
         
         if txt is None and self.filepath is None: 
             raise ValueError("'filepath' attribute and 'txt' parameter are None.")
@@ -33,6 +76,20 @@ class xyz_mol(object):
         self.xyz = xyz
 
     def parse(self,text):
+        """
+        Translates the contents of an xyz formatted string to the appropriate 
+        types.
+
+        Parameters
+        ----------
+        text : str
+            xyz formatted string. 
+
+        Returns
+        -------
+        tuple
+            n,title,atoms,coord
+        """
         lines = text.split('\n')
         n_atoms = int(lines[0])
         title = lines[1]
@@ -43,6 +100,21 @@ class xyz_mol(object):
         return n_atoms,title,atoms,coord
 
     def write(self,filepath=None):
+        """
+        writes the object to an xyz formatted string. If a path is provided 
+        it will write the contents to that path.  
+
+        Parameters
+        ----------
+        filepath : str or Path, optional
+            path to the file where the molecule should be written, by default None.
+            if none provided it will return the xyz formatted string.
+
+        Returns
+        -------
+        str
+            xyz formatted string of a molecule.
+        """
         n = self.n
         atoms = self.atoms
         xyz = self.xyz
@@ -59,7 +131,26 @@ class xyz_mol(object):
             return txt
         with open(filepath,'w') as F: 
             F.write(txt)
-class xyz_reader(object): 
+class XYZReader(object):
+    """
+    Lazy parser for large xyz files which allows generator-style iteration of 
+    the molecules present in the file. 
+
+    Attributes
+    ----------
+
+    filepath : str or Path
+        Path to the file to be read. 
+
+    molecules : list
+        Upon calling the read method a list of all XYZMol objects will be
+        available. Otherwise it is an empty list.
+
+    Parameters
+    ----------
+    filepath : str or Path
+        path to the file. 
+    """
     def __init__(self,filepath):
         self.filepath = Path(filepath)
         self.fd = None
@@ -79,7 +170,7 @@ class xyz_reader(object):
             for _ in range(n): 
                 line = fd.readline().strip()
                 lines.append(line)
-            mol = xyz_mol()
+            mol = XYZMolecule()
             mol.read('\n'.join(lines))
             yield mol
             # Attempt to read the number of atoms of the next molecule
