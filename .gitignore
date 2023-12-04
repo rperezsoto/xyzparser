@@ -6,6 +6,7 @@ __pycache__/
 
 # Other stuff to ignore
 _docs
+build
 .vscode
 .pytest_cache
 dist/
