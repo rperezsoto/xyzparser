@@ -6,10 +6,8 @@ xyzparser
 A lightweight python API to read xyz files
 ------------------------------------------
 
-This project is a simple set of two simple classes for simple parsing of 
-unimolecular and multimolecular xyz files. It is more of a code snippet
-than an actual package so feel free to copy and paste the code if you 
-want.
+A lightweight package of two classes for simple parsing of unimolecular 
+and multimolecular chemical xyz files. 
 
 Install
 -------
