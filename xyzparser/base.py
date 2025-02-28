@@ -99,7 +99,7 @@ class XYZMolecule(object):
         coord = np.array(xyz_num)
         return n_atoms,title,atoms,coord
 
-    def write(self,filepath=None):
+    def write(self,filepath=None,float_fmt='{: .6f}'):
         """
         writes the object to an xyz formatted string. If a path is provided 
         it will write the contents to that path.  
@@ -119,10 +119,11 @@ class XYZMolecule(object):
         atoms = self.atoms
         xyz = self.xyz
         title = self.title
+        float_fmt = float_fmt.format
         
         assert n == len(atoms)
         assert len(atoms) == xyz.shape[0]
-        xyz_lines = ['    '.join([at,str(x),str(y),str(z)]) 
+        xyz_lines = ['    '.join([at,float_fmt(x),float_fmt(y),float_fmt(z)]) 
                     for at,(x,y,z) in zip(atoms,xyz.tolist())]
         xyz_text = '\n'.join(xyz_lines)
 
