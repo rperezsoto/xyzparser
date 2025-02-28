@@ -158,32 +158,47 @@ class XYZReader(object):
         self.molecules = []
     
     def __iter__(self):
-        self.fd = fd = open(self.filepath,'r')
+        if self.fd is None: 
+            self.open()
     
         # Attempt to read the number of atoms
-        line = fd.readline().strip()
+        line = self.fd.readline().strip()
         while line.strip(): 
             lines = []
             n = int(line)
             lines = [line,]
-            title = fd.readline().strip()
+            title = self.fd.readline().strip()
             lines.append(title)
             for _ in range(n): 
-                line = fd.readline().strip()
+                line = self.fd.readline().strip()
                 lines.append(line)
             mol = XYZMolecule()
             mol.read('\n'.join(lines))
             yield mol
             # Attempt to read the number of atoms of the next molecule
-            line = fd.readline().strip()
-        fd.close()
+            line = self.fd.readline().strip()
+
+    def __enter__(self):
+        """ Wrapper to have similar behaviour to '_io.TextIOWrapper' """
+        self.open()
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ Wrapper to have similar behaviour to '_io.TextIOWrapper' """
+        if self.fd is not None:
+            return self.fd.__exit__(exc_type, exc_value, traceback)
+    
+    def open(self): 
+        self.fd = open(self.filepath,'r')
 
     def close(self):
         self.fd.close()
 
-    def read(self): 
+    def read(self):
+        self.open()
         self.molecules = [mol for mol in self]
         self.close()
+    
     def enforce_title(self,str_format='optid_{:04d}'): 
         for i,mol in enumerate(self.molecules): 
             mol.title = str_format.format(i)
